@@ -196,8 +196,8 @@ function start() {
     const publicURL = [
       config.proxy.ssl ? 'https://' : 'http://',
       config.proxy.hostname,
-      config.proxy.ssl && config.proxy.port !== 443 ? `:${config.proxy.port}` : '',
-      !config.proxy.ssl && config.proxy.port !== 80 ? `:${config.proxy.port}` : '',
+      config.proxy.ssl && port !== 443 ? `:${port}` : '',
+      !config.proxy.ssl && port !== 80 ? `:${port}` : '',
       '/',
     ].join('');
     console.info(`Open ${publicURL}`);
