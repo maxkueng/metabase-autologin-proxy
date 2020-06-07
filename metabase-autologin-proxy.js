@@ -202,6 +202,28 @@ function start() {
     ].join('');
     console.info(`Open ${publicURL}`);
   });
+
+  const shutdown = (signal, value) => {
+    server.close(() => {
+      proxy.close(() => {
+        console.log(`Server stopped by ${signal} with value ${value}`);
+        process.exit(128 + value);
+      });
+    });
+  };
+
+  const signals = {
+    'SIGHUP': 1,
+    'SIGINT': 2,
+    'SIGTERM': 15,
+  };
+
+  Object.entries(signals).forEach(([signal, value]) => {
+    process.on(signal, () => {
+      console.log(`process received a ${signal} signal`);
+      shutdown(signal, value);
+    });
+  });
 }
 
 start();
