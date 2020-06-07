@@ -13,6 +13,17 @@ want to plug in a keyboard to log in every time the session expires.
 metabase-autologin-proxy --config <PATH_TO_CONFIG_FILE>
 ```
 
+### Use with Docker
+
+```sh
+docker run \
+  -v $PWD/myconfig.conf:/etc/metabase-autologin-proxy.conf:ro \
+  -v $PWD/selfsigned.key:/opt/privkey.pem:ro \
+  -v $PWD/selfsigned.crt:/opt/fullchain.pem:ro \
+  -p 8011:443 \
+  maxkueng/metabase-autologin-proxy:latest
+```
+
 ## Configuration
 
 The default location for the config file is `./.metabase-autologin-proxy.conf`
