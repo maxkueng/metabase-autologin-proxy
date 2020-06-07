@@ -1,0 +1,30 @@
+{
+  "name": "metabase-autologin-proxy",
+  "version": "0.1.0",
+  "description": "An auto-login proxy for Metabase dashboards",
+  "author": "Max Kueng (https://maxkueng.com/contact)",
+  "license": "MIT",
+  "homepage": "https://github.com/maxkueng/metabase-autologin-proxy",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/maxkueng/metabase-autologin-proxy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maxkueng/metabase-autologin-proxy/issues"
+  },
+  "main": "metabase-autologin-proxy.js",
+  "bin": {
+    "metabase-autologin-proxy": "./metabase-autologin-proxy.js"
+  },
+  "files": [
+    "metabase-autologin-proxy.js",
+    "inject.js"
+  ],
+  "dependencies": {
+    "express": "^4.17.1",
+    "harmon": "^1.4.4",
+    "http-proxy": "^1.18.1",
+    "yaml": "^1.10.0",
+    "yargs": "^15.3.1"
+  }
+}
