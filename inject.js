@@ -1,6 +1,18 @@
 ;(function(window) {
+  const saveObj = (key, obj) => {
+    window.localStorage.setItem(key, JSON.stringify(obj));
+  }
+
+  const loadObj = (key) => {
+    const val = window.localStorage.getItem(key);
+    if (val) {
+      return JSON.parse(val);
+    }
+    return {};
+  }
+
   window.tvinit = ({ env }) => {
-    window.___tvenv = env;
+    saveObj('env', env);
   };
 
   const sleep = (t = 500) => new Promise((resolve) => { setTimeout(resolve, t); });
@@ -8,7 +20,7 @@
   const getConfig = () => ({
     dashboardpath: '/dashboard',
     ...window.___config,
-    ...(window.___tvenv || {})
+    ...loadObj('env'),
   });
 
   const setInputValue = (inputElement, value) => {
