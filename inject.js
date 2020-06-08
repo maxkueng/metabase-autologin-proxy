@@ -57,27 +57,21 @@
     return false;
   };
 
-  const navigate = (hashParams) => {
-    const searchParams = new window.URLSearchParams(window.location.search.replace('?', ''));
-    searchParams.set('_r', Math.ceil(Math.random() * 1000));
-
+  const getLink = (hashParams) => {
     const isDefaultPort = () => {
       if (window.location.protocol === 'https:' && window.location) {}
     };
 
-    const newURL = [
+    return [
       `${window.location.protocol}//`,
       window.location.hostname,
       window.location.port !== '' ? `:${window.location.port}` : '',
       window.location.pathname,
-      `?${searchParams.toString()}`,
       `#${hashParams.toString()}`,
     ].join('');
-
-    window.location.href = newURL;
   };
 
-  const autoSettings = async () => {
+  const setHashSettings = async () => {
     const config = getConfig();
 
     if (!window.location.pathname.startsWith(`${config.dashboardpath}/`)) {
@@ -90,8 +84,6 @@
       fullscreen: config.fullscreen ? '' : null,
     };
 
-    const oldParams = new window.URLSearchParams(window.location.hash.replace(/^#/, ''));
-
     const newParams = Object.entries(expected).reduce(
       (params, [key, value]) => {
         if (params.get(key) !== value) {
@@ -103,25 +95,45 @@
         }
         return params;
       },
-      new window.URLSearchParams(oldParams.toString()),
+      new window.URLSearchParams(),
     );
 
-    const changed = Object.keys(expected).reduce((changed, key) => (
-      changed || oldParams.get(key) !== newParams.get(key)
-    ), false);
 
-    if (changed) {
-      navigate(newParams)
+    window.history.replaceState('', '', getLink(newParams));
+  };
+
+  setHashSettings();
+
+  const checkSettings = async () => {
+    const config = getConfig();
+
+    if (config.theme) {}
+    const nightThemeCorrect = config.theme === 'night' && document.querySelector('.Dashboard--night') !== null;
+    const dayThemeCorrect = config.theme !== 'night' && document.querySelector('.Dashboard--night') === null;
+    const fullscreenCorrect = config.fullscreen && document.querySelector('.Dashboard--fullscreen') !== null;
+    const normalScreenCorrect = !config.fullscreen && document.querySelector('.Dashboard--fullscreen') === null;
+
+    const hashParams = new window.URLSearchParams(window.location.hash.replace(/^#/, ''));
+
+    const refreshCorrect = hashParams.get('refresh') === String(config.refresh);
+    const themeCorrect = nightThemeCorrect || dayThemeCorrect;
+    const screenCorrect = fullscreenCorrect || normalScreenCorrect;
+
+    if (!themeCorrect || !screenCorrect || !refreshCorrect) {
+      setHashSettings();
+      sleep(500);
+      window.location.reload();
     }
 
-    return changed;
+    setTimeout(() => { checkSettings(); }, 2000);
   };
 
   window.addEventListener('load', async (event) => {
     await sleep(1000);
     await autoLogin();
     await sleep(1000);
-    autoSettings();
+
+    checkSettings();
   });
 })(window);
 
