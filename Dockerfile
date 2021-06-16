@@ -1,10 +1,10 @@
 ARG ARCH=
-FROM ${ARCH}alpine:3.12.0
+FROM ${ARCH}alpine:3.14.0
 
 RUN \
   apk add --no-cache \
-    nodejs=12.17.0-r0 \
-    npm=12.17.0-r0
+    nodejs=14.17.1-r0 \
+    npm=14.17.1-r0
 
 WORKDIR /opt
 
