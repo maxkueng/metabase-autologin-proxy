@@ -38,9 +38,9 @@
       password,
     } = getConfig();
 
-    const emailInput = document.querySelector('.Login-content input[name="username"]');
-    const passwordInput = document.querySelector('.Login-content input[name="password"]');
-    const loginButton = document.querySelector('.Login-content button');
+    const emailInput = document.querySelector('form input[name="username"]');
+    const passwordInput = document.querySelector('form input[name="password"]');
+    const loginButton = document.querySelector('form button');
 
     if (emailInput && passwordInput && loginButton) {
 
