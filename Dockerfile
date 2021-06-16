@@ -3,8 +3,8 @@ FROM ${ARCH}alpine:3.14.0
 
 RUN \
   apk add --no-cache \
-    nodejs=14.17.1-r0 \
-    npm=14.17.1-r0
+    nodejs \
+    npm
 
 WORKDIR /opt
 
