@@ -17,6 +17,8 @@ const { AbortController } = require('node-abort-controller');
 
 const setTimeoutPromise = util.promisify(setTimeout);
 
+const HOUR = 60 * 60 * 1000;
+
 const argv = yargs
   .option('config', {
     alias: 'c',
@@ -45,6 +47,7 @@ const defaultConfig = {
     refresh: 3600,
     theme: 'night',
     fullscreen: true,
+    sessionIdRefreshInterval: 4 * HOUR,
   },
 };
 
@@ -193,7 +196,7 @@ async function start() {
     sessionIDLastCheck: 0,
   };
 
-  const sleep2 = async (t = 1000) => {
+  const sleep = async (t = 1000) => {
     const ac = new AbortController();
     state.sleeps.push(ac);
     try {
@@ -263,7 +266,7 @@ async function start() {
     while (!state.isExiting) {
       await updateSessionID();
       try {
-        await sleep2(10000);
+        await sleep(config.metabase.sessionIdRefreshInterval);
       } catch (err) {
         if (err.name === 'AbortError') {
           break;
@@ -274,7 +277,6 @@ async function start() {
   };
   
   updateSessionIDLoop();
-  // updateSessionID();
 
   const injectConfig = `;(function() { window.___config = ${JSON.stringify(config.metabase, null, '  ')}; })();`;
 
