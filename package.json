@@ -1,6 +1,6 @@
 {
   "name": "metabase-autologin-proxy",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "An auto-login proxy for Metabase dashboards",
   "author": "Max Kueng (https://maxkueng.com/contact)",
   "license": "MIT",
