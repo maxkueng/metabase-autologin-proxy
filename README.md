@@ -1,8 +1,8 @@
 # Metabase Auto-Login Proxy
 
-This is a proxy that injects some JavaScript into
-[Metabase](https://www.metabase.com/) to make it automatically log in, set the
-right theme and refresh interval, and make it enter fullscreen mode.
+This is a proxy for [Metabase](https://www.metabase.com/) that automatically
+logs in and injects some JavaScript to automatically set the right theme and
+refresh interval, and make it enter fullscreen mode.
 
 It's intended for dashboards that run on standalone screens where you don't
 want to plug in a keyboard to log in every time the session expires.
@@ -93,6 +93,10 @@ metabase:
   # Enter fullscreen mode.
   # Default: true
   fullscreen: true
+
+  # The interval at which to forcefully obtain a new session ID
+  # Default: 3600000 (4 hours)
+  sessionIdRefreshInterval: 3600000
 ```
 
 ## License
