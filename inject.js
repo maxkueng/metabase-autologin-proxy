@@ -70,11 +70,16 @@
       `#${hashParams.toString()}`,
     ].join('');
   };
+  
+  const isDashboardPage = () => {
+    const config = getConfig();
+    return window.location.pathname.startsWith(`${config.dashboardpath}/`);
+  };
 
   const setHashSettings = async () => {
     const config = getConfig();
 
-    if (!window.location.pathname.startsWith(`${config.dashboardpath}/`)) {
+    if (!isDashboardPage()) {
       return;
     }
 
@@ -105,6 +110,10 @@
   setHashSettings();
 
   const checkSettings = async () => {
+    if (!isDashboardPage()) {
+      return;
+    }
+
     const config = getConfig();
 
     if (config.theme) {}
@@ -130,9 +139,6 @@
 
   window.addEventListener('load', async (event) => {
     await sleep(1000);
-    await autoLogin();
-    await sleep(1000);
-
     checkSettings();
   });
 })(window);

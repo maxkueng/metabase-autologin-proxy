@@ -1,14 +1,21 @@
 #!/usr/bin/env node
 
+const util = require('util');
+const { setTimeout } = require('timers');
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const express = require('express');
+const { asyncMiddleware } = require('middleware-async');
 const httpProxy = require('http-proxy');
 const harmon = require('harmon');
 const yargs = require('yargs');
 const yaml = require('yaml');
+const axios = require('axios');
+const { AbortController } = require('node-abort-controller');
+
+const setTimeoutPromise = util.promisify(setTimeout);
 
 const argv = yargs
   .option('config', {
@@ -38,6 +45,43 @@ const defaultConfig = {
     refresh: 3600,
     theme: 'night',
     fullscreen: true,
+  },
+};
+
+const metabase = {
+  async checkSessionID(host, sessionID) {
+    try {
+      const res = await axios.request({
+        method: 'GET',
+        url: `${host}/api/user/current`,
+        headers: {
+          'X-Metabase-Session': sessionID,
+        },
+      });
+      return true;
+    } catch (err) {
+      if (err.response.status === 401) {
+        return false;
+      }
+      throw err;
+    }
+  },
+  async getSessionID(host, credentials) {
+    const {
+      email: username,
+      password,
+    } = credentials;
+
+    const res = await axios.request({
+      method: 'POST',
+      url: `${host}/api/session`,
+      data: {
+        username,
+        password,
+      },
+    });
+
+    return res.data.id;
   },
 };
 
@@ -137,10 +181,100 @@ function createServer(config, requestListener) {
   return http.createServer(requestListener);
 }
 
-function start() {
+async function start() {
   const config = getConfig();
   const app = express();
   const injectScript = fs.readFileSync(path.resolve(config.proxy.injectfile), 'utf-8');
+  const state = {
+    isExiting: false,
+    sleeps: [],
+    sessionID: null,
+    sessionIDLastUpdate: 0,
+    sessionIDLastCheck: 0,
+  };
+
+  const sleep2 = async (t = 1000) => {
+    const ac = new AbortController();
+    state.sleeps.push(ac);
+    try {
+      await setTimeoutPromise(t, null, { signal: ac.signal });
+      state.sleeps = state.sleeps.filter((s) => s !== ac);
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        console.log('sleep aborted');
+        state.sleeps = state.sleeps.filter((s) => s !== ac);
+        return;
+      }
+      throw err;
+    }
+  };
+  
+  const abortSleeps = () => {
+    const abortControllers = [...state.sleeps];
+    state.sleeps = [];
+    abortControllers.forEach((ac) => {
+      ac.abort();
+    });
+  };
+  
+  const checkSessionID = () => {
+    state.sessionIDLastCheck = new Date().getTime();
+    return metabase.checkSessionID(config.proxy.target, state.sessionID);
+  };
+  
+  const getSessionID = () => {
+    return metabase.getSessionID(config.proxy.target, {
+      email: config.metabase.email,
+      password: config.metabase.password,
+    });
+  };
+  
+  const softCheckSessionID = async () => {
+    const checkDelta = new Date().getTime() - state.sessionIDLastCheck;
+    if (checkDelta < 30000) {
+      return true;
+    }
+    return checkSessionID();
+  };
+  
+  const updateSessionID = async () => {
+    state.sessionIDLastUpdate = new Date().getTime();
+    state.sessionIDLastCheck = new Date().getTime();
+    const id = await getSessionID();
+    state.sessionID = id;
+    return id;
+  };
+  
+  const updateSessionIDIfExpired = async () => {
+    const isSessionValid = await metabase.checkSessionID(config.proxy.target, state.sessionID);
+    if (!isSessionValid) {
+      await updateSessionID();
+    }
+  };
+  
+  const softUpdateSessionIDIfExpired = async () => {
+    const isSessionValid = await softCheckSessionID(config.proxy.target, state.sessionID);
+    if (!isSessionValid) {
+      await updateSessionID();
+    }
+  };
+  
+  const updateSessionIDLoop = async () => {
+    while (!state.isExiting) {
+      await updateSessionID();
+      try {
+        await sleep2(10000);
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          break;
+        }
+        throw err;
+      }
+    }
+  };
+  
+  updateSessionIDLoop();
+  // updateSessionID();
 
   const injectConfig = `;(function() { window.___config = ${JSON.stringify(config.metabase, null, '  ')}; })();`;
 
@@ -162,6 +296,10 @@ function start() {
     res.end('Something went wrong.');
   });
 
+  proxy.on('proxyReq', (proxyReq, req, res, options) => {
+    proxyReq.setHeader('X-Metabase-Session', state.sessionID);
+  });
+
   const selects = [
     {
       query: 'head',
@@ -181,6 +319,11 @@ function start() {
     res.set('content-type', 'text/javascript');
     res.send([injectConfig, injectScript].join('\n'));
   });
+  
+  app.use(asyncMiddleware(async (req, res, next) => {
+    await softUpdateSessionIDIfExpired();
+    next();
+  }));
 
   app.use(harmon([], selects, true));
 
@@ -204,6 +347,8 @@ function start() {
   });
 
   const shutdown = (signal, value) => {
+    state.isExiting = true;
+    abortSleeps();
     server.close(() => {
       proxy.close(() => {
         console.log(`Server stopped by ${signal} with value ${value}`);
