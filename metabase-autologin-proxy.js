@@ -264,7 +264,11 @@ async function start() {
   
   const updateSessionIDLoop = async () => {
     while (!state.isExiting) {
-      await updateSessionID();
+      try {
+        await updateSessionID();
+      } catch (err) {
+        console.error(err);
+      }
       try {
         await sleep(config.metabase.sessionIdRefreshInterval);
       } catch (err) {
@@ -323,8 +327,13 @@ async function start() {
   });
   
   app.use(asyncMiddleware(async (req, res, next) => {
-    await softUpdateSessionIDIfExpired();
-    next();
+    try {
+      await softUpdateSessionIDIfExpired();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      next();
+    }
   }));
 
   app.use(harmon([], selects, true));
