@@ -21,7 +21,7 @@ docker run \
   -v $PWD/selfsigned.key:/opt/privkey.pem:ro \
   -v $PWD/selfsigned.crt:/opt/fullchain.pem:ro \
   -p 8011:443 \
-  maxkueng/metabase-autologin-proxy:latest
+  ghcr.io/maxkueng/metabase-autologin-proxy:latest
 ```
 
 ## Configuration
@@ -51,11 +51,11 @@ proxy:
 
   # Path to SSL key.
   # Default: privkey.pem
-  keyfile: privkey.pem
+  keyFile: privkey.pem
 
   # Path to SSL certificate.
   # Default: fullchain.pem
-  certfile: fullchain.pem
+  certFile: fullchain.pem
 
   # URL to your Metabase instance (must use https).
   # REQUIRED
@@ -63,16 +63,16 @@ proxy:
 
   # Provide custom auto-login script.
   # Default: ./inject.js
-  injectfile: inject.js
+  injectFile: inject.js
 
   # Customize the pathname of the injected script.
   # Default: /__inject.js
-  injectpath: /__inject.js
+  injectPath: /__inject.js
 
 metabase:
   # Pathname of the Metabase dashboards
   # Default: /dashboard
-  dashboardpath: /dashboard
+  dashboardPath: /dashboard
 
   # Login email of the Metabase user
   # REQUIRED
@@ -87,7 +87,7 @@ metabase:
   refresh: 3600
 
   # Metabase theme name.
-  # Default: night (sark)
+  # Default: night (dark)
   theme: night
 
   # Enter fullscreen mode.

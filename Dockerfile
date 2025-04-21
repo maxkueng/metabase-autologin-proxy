@@ -1,27 +1,20 @@
-ARG ARCH=
-FROM ${ARCH}alpine:3.14.0
+FROM node:22-alpine AS builder
 
-RUN \
-  apk add --no-cache \
-    nodejs \
-    npm
+WORKDIR /app
 
-WORKDIR /opt
+COPY package*.json ./
+RUN npm install
 
-COPY package.json ./
-COPY package-lock.json ./
-COPY metabase-autologin-proxy.js ./
-COPY inject.js ./
+COPY . .
+RUN npm run build
 
-RUN \
-  npm config set unsafe-perm \
-  && npm install \
-  && rm -f -r \
-    /root/.node-gyp \
-    /root/.npm \
-    /tmp/.[!.]* \
-    /tmp/* \
-    /usr/lib/node_modules \
-    /usr/local/share/.cache
+FROM node:22-alpine
 
-CMD ["/usr/bin/node", "/opt/metabase-autologin-proxy.js", "-c", "/etc/metabase-autologin-proxy.conf"]
+WORKDIR /app
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package*.json ./
+
+RUN npm install --omit=dev
+
+CMD ["node", "dist/cli.js", "--config", "/etc/metabase-autologin-proxy.conf"]
