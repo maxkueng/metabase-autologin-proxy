@@ -1,28 +1,27 @@
 {
-  "name": "metabase-autologin-proxy",
+  "name": "metagate",
   "version": "1.1.1",
   "description": "An auto-login proxy for Metabase dashboards",
   "author": "Max Kueng (https://maxkueng.com/contact)",
   "license": "MIT",
-  "homepage": "https://github.com/maxkueng/metabase-autologin-proxy",
+  "homepage": "https://github.com/maxkueng/metagate",
   "repository": {
     "type": "git",
-    "url": "git://github.com/maxkueng/metabase-autologin-proxy.git"
+    "url": "git://github.com/maxkueng/metagate.git"
   },
   "bugs": {
-    "url": "https://github.com/maxkueng/metabase-autologin-proxy/issues"
+    "url": "https://github.com/maxkueng/metagate/issues"
   },
   "main": "dist/cli.js",
   "bin": {
-    "metabase-autologin-proxy": "./dist/cli.js"
+    "metagate": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
     "start": "node dist/cli.js"
   },
   "files": [
-    "metabase-autologin-proxy.js",
-    "inject.js"
+    "dist/"
   ],
   "dependencies": {
     "axios": "^0.24.0",

@@ -22,5 +22,5 @@ jobs:
       - name: build and push to GHCR
         run: |
           docker buildx build --push \
-            --tag ghcr.io/${{ github.repository_owner }}/metabase-autologin-proxy:latest \
+            --tag ghcr.io/${{ github.repository_owner }}/metagate:latest \
             --platform linux/amd64,linux/arm64 .

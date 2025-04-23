@@ -68,7 +68,7 @@ export function loadConfig({
 }: LoadConfigOptions) {
   const resolvedPath = configPath
     ? path.resolve(configPath)
-    : path.join(process.cwd(), 'metabase-autologin-proxy.conf');
+    : path.join(process.cwd(), 'metagate.conf');
 
   const contents = fs.readFileSync(resolvedPath, 'utf-8');
   const parsed = parseConfig(contents);

@@ -17,4 +17,4 @@ COPY --from=builder /app/package*.json ./
 
 RUN npm install --omit=dev
 
-CMD ["node", "dist/cli.js", "--config", "/etc/metabase-autologin-proxy.conf"]
+CMD ["node", "dist/cli.js", "--config", "/etc/metagate.conf"]

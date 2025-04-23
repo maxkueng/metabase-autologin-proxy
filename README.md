@@ -1,4 +1,4 @@
-# Metabase Auto-Login Proxy
+# Metagate
 
 This is a proxy for [Metabase](https://www.metabase.com/) that automatically
 logs in and injects some JavaScript to automatically set the right theme and
@@ -10,23 +10,23 @@ want to plug in a keyboard to log in every time the session expires.
 ## Usage
 
 ```sh
-metabase-autologin-proxy --config <PATH_TO_CONFIG_FILE>
+metagate --config <PATH_TO_CONFIG_FILE>
 ```
 
 ### Use with Docker
 
 ```sh
 docker run \
-  -v $PWD/myconfig.conf:/etc/metabase-autologin-proxy.conf:ro \
+  -v $PWD/myconfig.conf:/etc/metagate.conf:ro \
   -v $PWD/selfsigned.key:/opt/privkey.pem:ro \
   -v $PWD/selfsigned.crt:/opt/fullchain.pem:ro \
   -p 8011:443 \
-  ghcr.io/maxkueng/metabase-autologin-proxy:latest
+  ghcr.io/maxkueng/metagate:latest
 ```
 
 ## Configuration
 
-The default location for the config file is `./.metabase-autologin-proxy.conf`
+The default location for the config file is `./.metagate.conf`
 
 ```yaml
 ---
